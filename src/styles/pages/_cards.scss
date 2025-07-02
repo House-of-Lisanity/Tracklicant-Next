@@ -1,0 +1,124 @@
+.card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--gold);
+  font-size: 0.95rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 35%;
+  flex: 1;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.card-subtitle {
+  font-size: 1rem;
+  font-weight: 500;
+  font-style: italic;
+  margin-bottom: 0.25rem;
+}
+
+.card-link {
+  font-size: 0.9rem;
+  color: var(--gold);
+  text-decoration: none;
+  margin-top: 0.25rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.card-meta {
+  flex-basis: 35%;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.card-actions {
+  flex-basis: 20%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .job-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+.card-col {
+  flex: 1 1 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card-left h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.card-left .company {
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.job-link {
+  font-size: 0.875rem;
+  color: var(--blue);
+  text-decoration: underline;
+}
+
+.meta-group {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.meta-group span {
+  display: block;
+}
+
+.notes {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.card-actions-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}

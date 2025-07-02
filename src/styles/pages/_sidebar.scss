@@ -1,0 +1,35 @@
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 220px;
+  background-color: #fdfaf6;
+  border-right: 3px solid var(--gold);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: var(--font-body);
+
+  nav.menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  button {
+    font-size: 0.85rem;
+    font-weight: 700;
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text);
+    padding: 0.5rem 0;
+    transition: border-bottom 0.3s ease;
+
+    &:hover {
+      border-bottom: 2px solid var(--gold);
+      color: var(--gold);
+    }
+  }
+}
