@@ -31,9 +31,8 @@ export default function ResumeEditor({
   const [parsedText, setParsedText] = useState(content);
   useEffect(() => {
     setParsedText(content);
-  }, [content]);
+  }, [isOpen, content]);
 
-  // placeholder parser (future: replace with real one)
   function parseTextToSections(text: string): Resume["sections"] {
     return {
       summary: text.split("\n\n")[0] || "",

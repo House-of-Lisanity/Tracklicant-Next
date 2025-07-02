@@ -17,7 +17,7 @@ export default function ResumePage() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-
+  const [resumeId, setResumeId] = useState<string | undefined>(undefined);
   const [parsedText, setParsedText] = useState<string>("");
   const [resumeName, setResumeName] = useState<string>("");
   const tableRef = useRef<ResumeLibraryHandle>(null);
@@ -33,10 +33,15 @@ export default function ResumePage() {
    * =============================== */
   const handleCloseEditor = () => setIsEditorOpen(false);
 
-  const handleEditParsedText = (text: string) => {
+  const handleOpenEditor = (text: string, id: string) => {
     setParsedText(text);
+    setResumeId(id);
     setIsEditing(true);
     setIsEditorOpen(true);
+  };
+
+  const handleEditParsedText = (text: string) => {
+    setParsedText(text);
   };
 
   const handleParsedResume = (parsedData: {
@@ -114,7 +119,10 @@ export default function ResumePage() {
 
         {/* Main Content */}
         <main className="main-content">
-          <ResumeLibrary ref={tableRef} />
+          <ResumeLibrary
+            ref={tableRef}
+            onEdit={(text, id) => handleOpenEditor(text, id)}
+          />
         </main>
       </div>
       <ResumeBuilder
@@ -128,6 +136,7 @@ export default function ResumePage() {
         onClose={handleCloseEditor}
         content={parsedText}
         onEdit={handleEditParsedText}
+        resumeId={resumeId}
         isEditing={isEditing}
         onSaveSuccess={handleRefresh}
         onRequestName={handleRequestName}
