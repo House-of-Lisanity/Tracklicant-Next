@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import "@/styles/components/navbar.scss";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -14,6 +15,14 @@ export default function Navbar() {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/login";
+
+  const handleLogout = async () => {
+    await fetch("/api/logout", { method: "POST" });
+    window.location.href = "/login";
+  };
 
   return (
     <header className={`navbar ${scrolled ? "scrolled" : ""}`}>
@@ -29,39 +38,33 @@ export default function Navbar() {
           <span className="logo-text">Tracklicant</span>
         </Link>
 
-        {/* Center (hidden on small) */}
-        <nav className="nav-links">
-          <Link href="/">Home</Link>
-          <Link href="/resumes">Resumes</Link>
-          {/* <Link href="/profile">Profile</Link> */}
-        </nav>
+        {!isLoginPage && (
+          <>
+            {/* Center (hidden on small) */}
+            <nav className="nav-links">
+              <Link href="/">Home</Link>
+              {/* <Link href="/resumes">Resumes</Link> */}
+              <Link href="/profile">Profile</Link>
+            </nav>
 
-        {/* Right: Profile or hamburger */}
-        <div className="nav-right">
-          <button className="profile-btn" aria-label="User Menu">
-            <span className="avatar-placeholder">👤</span>
-          </button>
-
-          {/* Hamburger for mobile */}
-          <button
-            className="hamburger"
-            aria-label="Toggle Menu"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            ☰
-          </button>
-        </div>
+            {/* Right: Logout */}
+            <div className="nav-right">
+              <button className="logout-link" onClick={handleLogout}>
+                Logout
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Dropdown for mobile */}
-      {isMenuOpen && (
+      {!isLoginPage && isMenuOpen && (
         <nav className="mobile-menu">
           <Link href="/" onClick={() => setIsMenuOpen(false)}>
             Home
           </Link>
-          <Link href="/resumes" onClick={() => setIsMenuOpen(false)}>
+          {/* <Link href="/resumes" onClick={() => setIsMenuOpen(false)}>
             Resumes
-          </Link>
+          </Link> */}
           <Link href="/profile" onClick={() => setIsMenuOpen(false)}>
             Profile
           </Link>

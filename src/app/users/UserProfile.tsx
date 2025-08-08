@@ -15,8 +15,10 @@ export default function UserProfilePage() {
       setProfile(JSON.parse(savedData));
     } else {
       setProfile({
-        fullName: "",
+        firstName: "",
+        lastName: "",
         email: "",
+        hashedPassword: "",
         phone: "",
         location: "",
         linkedIn: "",

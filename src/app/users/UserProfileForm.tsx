@@ -9,8 +9,10 @@ type Props = {
 export default function UserProfileForm({ initialData, onSave }: Props) {
   const [profile, setProfile] = useState<UserProfile>(
     initialData || {
-      fullName: "",
+      firstName: "",
+      lastName: "",
       email: "",
+      hashedPassword: "",
       phone: "",
       location: "",
       linkedIn: "",
@@ -63,9 +65,17 @@ export default function UserProfileForm({ initialData, onSave }: Props) {
       {/* Contact Info */}
       <input
         type="text"
-        placeholder="Full Name"
-        value={profile.fullName}
-        onChange={(e) => handleChange("fullName", e.target.value)}
+        placeholder="First Name"
+        value={profile.firstName}
+        onChange={(e) => handleChange("firstName", e.target.value)}
+        className="w-full p-2 border"
+      />
+
+      <input
+        type="text"
+        placeholder="Last Name"
+        value={profile.lastName}
+        onChange={(e) => handleChange("lastName", e.target.value)}
         className="w-full p-2 border"
       />
 

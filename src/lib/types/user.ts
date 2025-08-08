@@ -6,8 +6,11 @@ export interface EducationEntry {
 
 export interface UserProfile {
   userId?: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
+  userName: string;
   email: string;
+  hashedPassword: string;
   phone?: string;
   location?: string;
   linkedIn?: string;

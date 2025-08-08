@@ -3,6 +3,7 @@ import JobInputForm from "./JobInputForm";
 import { addJob } from "@/lib/api/jobs";
 import normalizeJob from "@/lib/utils/normalizeJob";
 import { Job } from "@/lib/types/job";
+import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 
 type AddJobProps = {
   isOpen: boolean;
@@ -36,30 +37,30 @@ export default function AddJob({ isOpen, onSuccess, onClose }: AddJobProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-lg relative">
-        <h2 className="text-xl font-bold mb-4">Add a New Job</h2>
-        <p>
-          Just drop in the job link. We’ll help with the basics, and you can
-          update anything along the way.
-        </p>
-        <p className="text-sm text-gray-500 italic mt-1 mb-4">
-          <span className="text-red-500">*</span> = Required field
-        </p>
+    <Dialog open={isOpen} onClose={onClose}>
+      <div className="DialogOverlay">
+        <DialogPanel className="DialogPanel">
+          <DialogTitle>Add a New Job</DialogTitle>
+          <p>
+            Just drop in the job link. We’ll help with the basics, and you can
+            update anything along the way.
+          </p>
+          <p>
+            <span>*</span> = Required field
+          </p>
 
-        <JobInputForm onSubmit={postJob} onCancel={onClose} />
-        {message && (
-          <div
-            className={`mb-4 p-3 rounded ${
-              messageType === "success"
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-            }`}
-          >
-            {message}
-          </div>
-        )}
+          <JobInputForm onSubmit={postJob} onCancel={onClose} />
+          {message && (
+            <div
+              className={`${
+                messageType === "success" ? "DialogSuccess" : "DialogError"
+              }`}
+            >
+              {message}
+            </div>
+          )}
+        </DialogPanel>
       </div>
-    </div>
+    </Dialog>
   );
 }

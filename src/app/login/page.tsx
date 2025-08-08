@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -15,11 +15,11 @@ export default function LoginPage() {
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ userName, password }),
     });
 
     if (res.ok) {
-      router.push("/home");
+      router.push("/dashboard");
     } else {
       const data = await res.json();
       setError(data.message || "Login failed");
@@ -34,11 +34,11 @@ export default function LoginPage() {
         style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
       >
         <input
-          type="email"
-          placeholder="Email"
-          value={email}
+          type="text"
+          placeholder="Username"
+          value={userName}
           required
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => setUserName(e.target.value)}
         />
         <input
           type="password"

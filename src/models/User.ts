@@ -3,8 +3,11 @@ import type { UserProfile as UserInterface } from "@/lib/types/user";
 
 const UserSchema = new Schema<UserInterface>(
   {
-    fullName: { type: String, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    userName: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
+    hashedPassword: { type: String, required: true },
     phone: String,
     location: String,
     linkedIn: String,
