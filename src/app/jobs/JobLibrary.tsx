@@ -22,10 +22,23 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
     "success"
   );
 
+  // helper to coerce strings/null into Date|null
+  function toDate(v: unknown): Date | null {
+    if (!v) return null;
+    if (v instanceof Date) return v;
+    const d = new Date(String(v));
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function normalizeJobDates(arr: Job[]): Job[] {
+    // Keep data as-is; we’ll parse on use so we don’t fight types (string vs Date)
+    return arr.map((j) => ({ ...j }));
+  }
+
   const loadJobs = async () => {
     try {
       const data = await fetchJobs();
-      setJobs(data);
+      setJobs(normalizeJobDates(data));
     } catch (error) {
       console.error("Fetch error:", error);
       setMessage("❌ Error fetching jobs.");
@@ -74,11 +87,138 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
     }
   };
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState<
+    "all" | "thisWeek" | "lastWeek" | "thisMonth" | "lastMonth"
+  >("all");
+  const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
+  const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
+
+  const filteredJobs = jobs.filter((job) => {
+    // Keyword match
+    const keywordMatch = searchTerm
+      ? job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (job.notes &&
+          job.notes.toLowerCase().includes(searchTerm.toLowerCase()))
+      : true;
+
+    // Date match
+    const jobDate = toDate(job.appliedDate);
+
+    let dateMatch = true;
+
+    if (dateFilter !== "all" && jobDate) {
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+
+      const startOfLastWeek = new Date(startOfWeek);
+      startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+      const endOfLastWeek = new Date(startOfLastWeek);
+      endOfLastWeek.setDate(endOfLastWeek.getDate() + 6);
+
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfLastMonth = new Date(
+        now.getFullYear(),
+        now.getMonth() - 1,
+        1
+      );
+      const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+      if (dateFilter === "thisWeek") {
+        dateMatch = jobDate >= startOfWeek && jobDate <= endOfWeek;
+      } else if (dateFilter === "lastWeek") {
+        dateMatch = jobDate >= startOfLastWeek && jobDate <= endOfLastWeek;
+      } else if (dateFilter === "thisMonth") {
+        dateMatch = jobDate >= startOfMonth;
+      } else if (dateFilter === "lastMonth") {
+        dateMatch = jobDate >= startOfLastMonth && jobDate <= endOfLastMonth;
+      }
+    }
+
+    // Custom range override
+    if (customStartDate && customEndDate && jobDate) {
+      dateMatch = jobDate >= customStartDate && jobDate <= customEndDate;
+    }
+
+    return keywordMatch && dateMatch;
+  });
+
   return (
     <div>
       <div>
         <h3>My Jobs</h3>
+
+        {/* Filters */}
+        <div className="filters toolbar">
+          <div className="filter-search">
+            <input
+              type="text"
+              placeholder="Search by keyword…"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Keyword search"
+            />
+          </div>
+
+          <select
+            value={dateFilter}
+            onChange={(e) =>
+              setDateFilter(
+                e.target.value as
+                  | "all"
+                  | "thisWeek"
+                  | "lastWeek"
+                  | "thisMonth"
+                  | "lastMonth"
+              )
+            }
+            aria-label="Quick date range"
+          >
+            <option value="all">All Dates</option>
+            <option value="thisWeek">This Week</option>
+            <option value="lastWeek">Last Week</option>
+            <option value="thisMonth">This Month</option>
+            <option value="lastMonth">Last Month</option>
+          </select>
+
+          <input
+            type="date"
+            value={
+              customStartDate ? customStartDate.toISOString().slice(0, 10) : ""
+            }
+            onChange={(e) =>
+              setCustomStartDate(
+                e.target.value ? new Date(e.target.value) : null
+              )
+            }
+            aria-label="Start date"
+          />
+
+          <input
+            type="date"
+            value={
+              customEndDate ? customEndDate.toISOString().slice(0, 10) : ""
+            }
+            onChange={(e) =>
+              setCustomEndDate(e.target.value ? new Date(e.target.value) : null)
+            }
+            aria-label="End date"
+          />
+          <button
+            type="button"
+            className="filter-apply-btn"
+            onClick={() => setSearchTerm(searchTerm.trim())}
+            aria-label="Apply search"
+          >
+            ➔
+          </button>
+        </div>
       </div>
+
       {message && (
         <div
           className={` ${
@@ -90,9 +230,10 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
           {message}
         </div>
       )}
-      {jobs.length > 0 ? (
+
+      {filteredJobs.length > 0 ? (
         <div>
-          {jobs.map((job) => (
+          {filteredJobs.map((job) => (
             <JobCard
               key={job._id}
               job={job}
@@ -105,8 +246,9 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
           ))}
         </div>
       ) : (
-        <p>No jobs to display yet.</p>
+        <p>No jobs match your filters.</p>
       )}
+
       <EditJobModal
         isOpen={isModalOpen}
         job={editingJob!}

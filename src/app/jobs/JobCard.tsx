@@ -26,7 +26,12 @@ export default function JobCard({ job, onEdit, onDelete }: JobCardProps) {
 
       <div className="card-meta">
         <div>Status: {job.status || "—"}</div>
-        <div>Applied: {job.appliedDate || "—"}</div>
+        <div>
+          Applied:{" "}
+          {job.appliedDate
+            ? new Date(job.appliedDate).toLocaleDateString()
+            : "—"}
+        </div>
         <div>Resume: {job.resumeVersion || "—"}</div>
       </div>
 
