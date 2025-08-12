@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
   }
 
   const created = await Job.create({
-    userId, // ✅ Add userId from token!
+    userId: new Types.ObjectId(userId),
     jobTitle: data.jobTitle,
     company: data.company,
     postingLink: data.postingLink || "",

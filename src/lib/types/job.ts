@@ -1,5 +1,6 @@
 export interface Job {
   _id?: string;
+  userId?: string; // Optional for frontend use, required in backend
   jobTitle: string;
   company: string;
   postingLink?: string;

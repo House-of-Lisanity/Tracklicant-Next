@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import "@/styles/components/navbar.scss";
 import { usePathname } from "next/navigation";
 
 export default function Navbar() {
@@ -44,7 +43,7 @@ export default function Navbar() {
             <nav className="nav-links">
               <Link href="/">Home</Link>
               {/* <Link href="/resumes">Resumes</Link> */}
-              <Link href="/profile">Profile</Link>
+              {/* <Link href="/profile">Profile</Link> */}
             </nav>
 
             {/* Right: Logout */}

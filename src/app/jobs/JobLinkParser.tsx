@@ -9,8 +9,6 @@ export default function JobLinkParser({ onParsed }: Props) {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [title, setTitle] = useState("");
-  const [company, setCompany] = useState("");
 
   const handleParse = async () => {
     setLoading(true);
@@ -22,9 +20,13 @@ export default function JobLinkParser({ onParsed }: Props) {
         body: JSON.stringify({ url }),
       });
       const data = await response.json();
-      if (data.error) throw new Error(data.error);
-      setTitle(data.title || "");
-      setCompany(data.company || "");
+      if (data.error) {
+        setError(
+          "We couldn't parse this link, but you can still fill it in manually."
+        );
+        return;
+      }
+
       onParsed({ jobTitle: data.title, company: data.company });
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -38,45 +40,32 @@ export default function JobLinkParser({ onParsed }: Props) {
   };
 
   return (
-    <div className="space-y-2">
-      <label className="block font-medium">Job Posting URL</label>
+    <div className="form-group">
+      <label htmlFor="postingLink">
+        Posting Link<span>*</span>
+      </label>
       <input
         type="text"
         value={url}
+        required
         onChange={(e) => setUrl(e.target.value)}
-        className="w-full border p-2 rounded"
+        onBlur={() => {
+          if (url) handleParse();
+        }}
         placeholder="Paste job posting link..."
       />
-      <button
-        type="button"
-        onClick={handleParse}
-        disabled={loading || !url}
-        className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
-      >
-        {loading ? "Parsing..." : "Parse"}
-      </button>
+      <div className="form-actions">
+        <button
+          type="button"
+          onClick={handleParse}
+          disabled={loading || !url}
+          className="btn-secondary"
+        >
+          {loading ? "Parsing..." : "Get Job Info"}
+        </button>
+      </div>
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
-
-      {(title || company) && (
-        <div className="mt-4 space-y-2">
-          <label className="block font-medium">Job Title</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
-
-          <label className="block font-medium">Company</label>
-          <input
-            type="text"
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
-        </div>
-      )}
     </div>
   );
 }

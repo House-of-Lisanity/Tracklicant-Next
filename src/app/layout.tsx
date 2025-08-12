@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
-import "./globals.scss";
+import "../styles/globals.scss";
 
 export const metadata: Metadata = {
   title: "Tracklicant",
@@ -17,9 +15,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <div className="layout-root">
-          <Navbar />
           <main className="layout-main">{children}</main>
-          <Footer />
         </div>
       </body>
     </html>

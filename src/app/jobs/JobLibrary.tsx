@@ -1,5 +1,8 @@
 "use client";
 
+/* =========================
+   React + App Imports
+   ========================= */
 import {
   useState,
   useEffect,
@@ -13,7 +16,13 @@ import { scrollToTopIfNeeded } from "@/lib/utils/scrollHelpers";
 import { fetchJobs, deleteJob, updateJob } from "@/lib/api/jobs";
 import type { Job, JobLibraryHandle } from "@/lib/types/job";
 
+/* =========================
+   Component
+   ========================= */
 const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
+  /* ---------------------------------
+     UI + Data State
+     --------------------------------- */
   const [jobs, setJobs] = useState<Job[]>([]);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,7 +31,10 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
     "success"
   );
 
-  // helper to coerce strings/null into Date|null
+  /* ---------------------------------
+     Helpers (pure, no side effects)
+     --------------------------------- */
+  // Coerce strings/null into Date|null
   function toDate(v: unknown): Date | null {
     if (!v) return null;
     if (v instanceof Date) return v;
@@ -30,15 +42,18 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
     return isNaN(d.getTime()) ? null : d;
   }
 
-  function normalizeJobDates(arr: Job[]): Job[] {
-    // Keep data as-is; we’ll parse on use so we don’t fight types (string vs Date)
-    return arr.map((j) => ({ ...j }));
-  }
+  // function normalizeJobDates(arr: Job[]): Job[] {
+  //   return arr.map((j) => ({ ...j }));
+  // }
 
+  /* ---------------------------------
+     API Logic (fetch, mutate, refresh)
+     --------------------------------- */
+  // Load all jobs
   const loadJobs = async () => {
     try {
       const data = await fetchJobs();
-      setJobs(normalizeJobDates(data));
+      setJobs(data);
     } catch (error) {
       console.error("Fetch error:", error);
       setMessage("❌ Error fetching jobs.");
@@ -46,14 +61,35 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
     }
   };
 
+  // Initial load
   useEffect(() => {
     loadJobs();
   }, []);
 
+  // Listen for "job:saved" and refresh (also reset filters so new records are visible)
+  useEffect(() => {
+    const onJobSaved = () => {
+      // Optional, but keeps UX clear so users see all jobs right after adding
+      setSearchTerm("");
+      setDateFilter("all");
+      setCustomStartDate(null);
+      setCustomEndDate(null);
+
+      loadJobs();
+    };
+
+    window.addEventListener("job:saved", onJobSaved as EventListener);
+    return () => {
+      window.removeEventListener("job:saved", onJobSaved as EventListener);
+    };
+  }, []);
+
+  // Expose refresh() to parent via ref
   useImperativeHandle(ref, () => ({
     refresh: loadJobs,
   }));
 
+  // Delete handler
   const handleDelete = async (id: string) => {
     try {
       await deleteJob(id);
@@ -61,9 +97,9 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
       scrollToTopIfNeeded();
       setMessage("Job deleted successfully!");
       setMessageType("success");
-      setTimeout(() => {
-        setMessage(null);
-      }, 3000);
+      setTimeout(() => setMessage(null), 3000);
+      // Emit for any other listeners
+      window.dispatchEvent(new CustomEvent("job:deleted"));
     } catch (err) {
       console.error("❌ DELETE error:", err);
       setMessage("❌ Error deleting job.");
@@ -71,6 +107,7 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
     }
   };
 
+  // Update handler
   const handleUpdate = async (id: string, updatedJob: Job) => {
     const { _id, ...jobWithoutId } = updatedJob;
 
@@ -87,6 +124,10 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
     }
   };
 
+  /* ---------------------------------
+     Filtering State + Logic
+     --------------------------------- */
+  // Filter UI state
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState<
     "all" | "thisWeek" | "lastWeek" | "thisMonth" | "lastMonth"
@@ -94,18 +135,18 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
   const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
 
+  // Derived filtered list
   const filteredJobs = jobs.filter((job) => {
-    // Keyword match
-    const keywordMatch = searchTerm
-      ? job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (job.notes &&
-          job.notes.toLowerCase().includes(searchTerm.toLowerCase()))
-      : true;
+    // Keyword match (optional)
+    const keywordMatch =
+      !searchTerm ||
+      job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (!!job.notes &&
+        job.notes.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    // Date match
+    // Date match (appliedDate only)
     const jobDate = toDate(job.appliedDate);
-
     let dateMatch = true;
 
     if (dateFilter !== "all" && jobDate) {
@@ -147,9 +188,12 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
     return keywordMatch && dateMatch;
   });
 
+  /* -----------
+     JSX
+     ----------- */
   return (
-    <div>
-      <div>
+    <div className="joblibrary">
+      <div className="joblibrary-header">
         <h3>My Jobs</h3>
 
         {/* Filters */}
@@ -231,23 +275,25 @@ const JobLibrary: ForwardRefRenderFunction<JobLibraryHandle> = (_, ref) => {
         </div>
       )}
 
-      {filteredJobs.length > 0 ? (
-        <div>
-          {filteredJobs.map((job) => (
-            <JobCard
-              key={job._id}
-              job={job}
-              onEdit={() => {
-                setEditingJob(job);
-                setIsModalOpen(true);
-              }}
-              onDelete={() => job._id && handleDelete(job._id)}
-            />
-          ))}
-        </div>
-      ) : (
-        <p>No jobs match your filters.</p>
-      )}
+      <div className="Joblibrary-scroll">
+        {filteredJobs.length > 0 ? (
+          <div>
+            {filteredJobs.map((job) => (
+              <JobCard
+                key={job._id}
+                job={job}
+                onEdit={() => {
+                  setEditingJob(job);
+                  setIsModalOpen(true);
+                }}
+                onDelete={() => job._id && handleDelete(job._id)}
+              />
+            ))}
+          </div>
+        ) : (
+          <p>No jobs match your filters.</p>
+        )}
+      </div>
 
       <EditJobModal
         isOpen={isModalOpen}

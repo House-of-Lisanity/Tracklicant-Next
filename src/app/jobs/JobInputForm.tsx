@@ -1,12 +1,9 @@
 "use client";
 import { useForm, Controller } from "react-hook-form";
 import { Job } from "@/lib/types/job";
-import { parseJobLink } from "@/lib/api/jobs";
-import { useState } from "react";
-// import ResumeSelector from "../../../_archive/resumes/ResumeSelector";
-// import ResumeBuilder from "../../../_archive/resumes/ResumeBuilder";
+import JobLinkParser from "./JobLinkParser"; // ✅ import your component
 
-type JobFormData = Omit<Job, "_id">;
+type JobFormData = Omit<Job, "_id" | "userId">;
 
 export type JobFormProps = {
   onSubmit: (data: JobFormData, reset: () => void) => void;
@@ -36,57 +33,27 @@ export default function JobInputForm({ onSubmit, onCancel }: JobFormProps) {
   const submitHandler = (data: JobFormData) => {
     onSubmit(data, reset);
   };
-  const [parsing, setParsing] = useState(false);
-  // const [resumeBuilderOpen, setResumeBuilderOpen] = useState(false);
-  // const handleResumeParsed = (parsedData: unknown) => {
-  //   // Handle parsed resume data here
-  //   console.log("Parsed Resume Data:", parsedData);
-  // };
 
   return (
     <>
       <form onSubmit={handleSubmit(submitHandler)}>
         {/* Posting Link */}
         <div className="form-group">
-          <label htmlFor="postingLink">
-            Posting Link<span>*</span>
-          </label>
-          <Controller
-            name="postingLink"
-            control={control}
-            render={({ field }) => (
-              <input
-                {...field}
-                id="postingLink"
-                type="text"
-                onBlur={async () => {
-                  if (field.value) {
-                    setParsing(true);
-                    try {
-                      const { jobTitle, company } = await parseJobLink(
-                        field.value
-                      );
-                      if (jobTitle) {
-                        setValue("jobTitle", jobTitle, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        });
-                      }
-                      if (company) {
-                        setValue("company", company, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        });
-                      }
-                    } catch (err) {
-                      console.error("❌ Failed to parse job link", err);
-                    } finally {
-                      setParsing(false);
-                    }
-                  }
-                }}
-              />
-            )}
+          <JobLinkParser
+            onParsed={({ jobTitle, company }) => {
+              if (jobTitle) {
+                setValue("jobTitle", jobTitle, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
+              }
+              if (company) {
+                setValue("company", company, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
+              }
+            }}
           />
         </div>
 
@@ -99,13 +66,7 @@ export default function JobInputForm({ onSubmit, onCancel }: JobFormProps) {
             name="jobTitle"
             control={control}
             rules={{ required: "Job title is required" }}
-            render={({ field }) => (
-              <input
-                {...field}
-                id="jobTitle"
-                placeholder={parsing ? "Getting job info..." : ""}
-              />
-            )}
+            render={({ field }) => <input {...field} id="jobTitle" />}
           />
           {errors.jobTitle && (
             <p className="DialogError">{errors.jobTitle.message}</p>
@@ -121,13 +82,7 @@ export default function JobInputForm({ onSubmit, onCancel }: JobFormProps) {
             name="company"
             control={control}
             rules={{ required: "Company name is required" }}
-            render={({ field }) => (
-              <input
-                {...field}
-                id="company"
-                placeholder={parsing ? "Getting job info..." : ""}
-              />
-            )}
+            render={({ field }) => <input {...field} id="company" />}
           />
           {errors.company && (
             <p className="DialogError">{errors.company.message}</p>
@@ -178,15 +133,6 @@ export default function JobInputForm({ onSubmit, onCancel }: JobFormProps) {
           />
         </div>
 
-        {/* Resume Version */}
-        {/* <div className="form-group">
-          <label>Resume Version</label>
-          <ResumeSelector
-            onSelect={(id) => setValue("resumeVersion", id)}
-            onRequestUpload={() => setResumeBuilderOpen(true)}
-          />
-        </div> */}
-
         {/* Notes */}
         <div className="form-group">
           <label htmlFor="notes">Notes</label>
@@ -209,11 +155,6 @@ export default function JobInputForm({ onSubmit, onCancel }: JobFormProps) {
           </button>
         </div>
       </form>
-      {/* <ResumeBuilder
-        isOpen={resumeBuilderOpen}
-        onClose={() => setResumeBuilderOpen(false)}
-        onParsed={(parsedData) => handleResumeParsed(parsedData)}
-      /> */}
     </>
   );
 }

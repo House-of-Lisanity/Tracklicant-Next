@@ -19,10 +19,23 @@ export default function AddJob({ isOpen, onSuccess, onClose }: AddJobProps) {
 
   if (!isOpen) return null;
 
+  // ensure dates are strings ("YYYY-MM-DD") or undefined
+  const toDateString = (v: unknown) => {
+    if (!v) return undefined;
+    const d = v instanceof Date ? v : new Date(String(v));
+    return isNaN(d.getTime()) ? undefined : d.toISOString().slice(0, 10);
+  };
+
   const postJob = async (newJob: Job, reset: () => void) => {
     try {
-      const jobToSend = normalizeJob(newJob);
+      const jobToSend = normalizeJob({
+        ...newJob,
+        appliedDate: toDateString(newJob.appliedDate),
+        rejectedDate: toDateString(newJob.rejectedDate),
+      });
+
       await addJob(jobToSend);
+      window.dispatchEvent(new CustomEvent("job:saved")); // notify JobLibrary to refresh
       // setMessage("✅ Job saved successfully!");
       // setMessageType("success");
       reset();

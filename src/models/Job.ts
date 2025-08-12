@@ -3,6 +3,7 @@ import type { Job as JobInterface } from "@/lib/types/job";
 
 const JobSchema = new Schema<JobInterface>(
   {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     jobTitle: { type: String, required: true },
     company: { type: String, required: true },
     postingLink: String,

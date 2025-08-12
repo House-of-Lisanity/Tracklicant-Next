@@ -3,6 +3,7 @@ import type { Job, ParsedJobInfo } from "@/lib/types/job";
 
 export const fetchJobs = async () => {
   const response = await apiClient.get("/api/jobs");
+  console.log("Fetched jobs:", response.data);
   return response.data;
 };
 

@@ -74,12 +74,16 @@ export async function POST(req: NextRequest) {
     lastName,
   });
 
-  const token = signToken({ userId: newUser._id.toString(), email });
+  const token = signToken({
+    userId: newUser._id.toString(),
+    userName: newUser.userName,
+  });
 
   const res = NextResponse.json({ message: "User created." });
   res.cookies.set("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
   });

@@ -1,0 +1,20 @@
+/* JobLibrary layout: header fixed in place, list scrolls */
+.joblibrary {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* fill .main-content */
+}
+
+.joblibrary-header {
+  position: sticky; /* optional: keeps header visible if page scrolls */
+  top: 0;
+  z-index: 1;
+  background: var(--gray);
+  padding-bottom: 0.25rem;
+}
+
+.joblibrary-scroll {
+  flex: 1; /* take remaining space */
+  overflow: auto; /* only the list scrolls */
+  padding-right: 0.25rem; /* tiny breathing room for scrollbar */
+}
