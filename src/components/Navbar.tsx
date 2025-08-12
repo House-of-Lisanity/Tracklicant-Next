@@ -59,9 +59,9 @@ export default function Navbar() {
 
       {!(isLoginPage || isLandingPage) && isMenuOpen && (
         <nav className="mobile-menu">
-          <Link href="/" onClick={() => setIsMenuOpen(false)}>
+          {/* <Link href="/" onClick={() => setIsMenuOpen(false)}>
             Home
-          </Link>
+          </Link> */}
           {/* <Link href="/resumes" onClick={() => setIsMenuOpen(false)}>
       Resumes
     </Link> */}
