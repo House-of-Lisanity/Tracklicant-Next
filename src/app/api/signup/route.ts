@@ -3,9 +3,16 @@ import bcrypt from "bcryptjs";
 import { User } from "@/models/User";
 import { connectToDatabase } from "@/lib/mongodb";
 import { signToken } from "@/lib/auth";
+import mongoose from "mongoose";
 
 export async function POST(req: NextRequest) {
   await connectToDatabase();
+  console.log(
+    "[signup] db:",
+    mongoose.connection.name,
+    "collection:",
+    User.collection.name
+  );
   const { email, password, confirmPassword, userName, firstName, lastName } =
     await req.json();
 
