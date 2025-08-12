@@ -16,9 +16,11 @@ export async function POST(req: NextRequest) {
   }
 
   const user = await User.findOne({ userName });
+
+  // TEMP diagnostics — remove after test
   if (!user) {
     return NextResponse.json(
-      { message: "Invalid credentials." },
+      { message: "Invalid username (not found)" },
       { status: 401 }
     );
   }
@@ -26,10 +28,26 @@ export async function POST(req: NextRequest) {
   const isMatch = await bcrypt.compare(password, user.hashedPassword);
   if (!isMatch) {
     return NextResponse.json(
-      { message: "Invalid credentials." },
+      { message: "Invalid password (hash compare failed)" },
       { status: 401 }
     );
   }
+
+  // const user = await User.findOne({ userName });
+  // if (!user) {
+  //   return NextResponse.json(
+  //     { message: "Invalid credentials." },
+  //     { status: 401 }
+  //   );
+  // }
+
+  // const isMatch = await bcrypt.compare(password, user.hashedPassword);
+  // if (!isMatch) {
+  //   return NextResponse.json(
+  //     { message: "Invalid credentials." },
+  //     { status: 401 }
+  //   );
+  // }
 
   const token = signToken({ userId: user._id.toString(), userName });
 
