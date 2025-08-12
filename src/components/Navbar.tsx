@@ -17,6 +17,7 @@ export default function Navbar() {
 
   const pathname = usePathname();
   const isLoginPage = pathname === "/login";
+  const isLandingPage = pathname === "/";
 
   const handleLogout = async () => {
     await fetch("/api/logout", { method: "POST" });
@@ -37,7 +38,7 @@ export default function Navbar() {
           <span className="logo-text">Tracklicant</span>
         </Link>
 
-        {!isLoginPage && (
+        {!(isLoginPage || isLandingPage) && (
           <>
             {/* Center (hidden on small) */}
             <nav className="nav-links">
@@ -56,14 +57,14 @@ export default function Navbar() {
         )}
       </div>
 
-      {!isLoginPage && isMenuOpen && (
+      {!(isLoginPage || isLandingPage) && isMenuOpen && (
         <nav className="mobile-menu">
           <Link href="/" onClick={() => setIsMenuOpen(false)}>
             Home
           </Link>
           {/* <Link href="/resumes" onClick={() => setIsMenuOpen(false)}>
-            Resumes
-          </Link> */}
+      Resumes
+    </Link> */}
           <Link href="/profile" onClick={() => setIsMenuOpen(false)}>
             Profile
           </Link>

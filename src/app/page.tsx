@@ -12,7 +12,10 @@ export default function LandingPage() {
         <section className="hero">
           <div className="hero-content">
             <h1>Welcome to Tracklicant!</h1>
-            <p className="tagline">Your personal job search command center.</p>
+            <p className="tagline">
+              A simple job application tracker where all you need is a job link.
+              Easily keep track of actions, dates, notes, all in one place.
+            </p>
             <div className="cta-buttons">
               <Link href="/login" className="btn">
                 Log In
